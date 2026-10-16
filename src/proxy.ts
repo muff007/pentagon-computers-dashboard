@@ -21,7 +21,14 @@ const STATIC_FILE = /\.(?:jpe?g|png|gif|webp|avif|svg|ico|txt|xml|woff2?|ttf)$/i
  * silently breaks installation: the browser fetches the worker, is handed a
  * redirect, and registration fails with nothing to show for it.
  */
-const PWA_FILE = new Set(["/sw.js", "/manifest.webmanifest", "/offline"]);
+const PWA_FILE = new Set([
+  "/sw.js",
+  "/manifest.webmanifest",
+  "/offline",
+  // Android fetches this anonymously to decide whether the installed app may
+  // drop its address bar. Behind the login it would never be read.
+  "/.well-known/assetlinks.json",
+]);
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

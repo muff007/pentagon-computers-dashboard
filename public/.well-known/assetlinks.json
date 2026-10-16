@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.pentagoncomputers.dashboard",
+      "sha256_cert_fingerprints": [
+        "64:15:66:04:1A:E9:14:63:9A:E1:5F:DD:14:18:B7:EB:AF:D8:56:F1:46:06:24:58:F1:08:36:24:C4:47:21:1D"
+      ]
+    }
+  }
+]
