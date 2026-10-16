@@ -1,5 +1,16 @@
 import type { NextConfig } from "next";
 
+// Build provenance. Vercel sets these during a Git-triggered build, so this
+// line states in the build log exactly which repository, branch and commit
+// were compiled — which is otherwise guesswork when a deploy misbehaves.
+console.log(
+  "[build] repo=%s/%s branch=%s commit=%s",
+  process.env.VERCEL_GIT_REPO_OWNER ?? "-",
+  process.env.VERCEL_GIT_REPO_SLUG ?? "-",
+  process.env.VERCEL_GIT_COMMIT_REF ?? "-",
+  process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "local",
+);
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
