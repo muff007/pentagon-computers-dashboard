@@ -15,6 +15,14 @@ import { NextResponse, type NextRequest } from "next/server";
  */
 const STATIC_FILE = /\.(?:jpe?g|png|gif|webp|avif|svg|ico|txt|xml|woff2?|ttf)$/i;
 
+/**
+ * Installing the dashboard to a phone happens before there is any session, so
+ * these three have to answer without a cookie. Redirecting them to /login
+ * silently breaks installation: the browser fetches the worker, is handed a
+ * redirect, and registration fails with nothing to show for it.
+ */
+const PWA_FILE = new Set(["/sw.js", "/manifest.webmanifest", "/offline"]);
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -22,6 +30,7 @@ export function proxy(request: NextRequest) {
     pathname === "/login" ||
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico" ||
+    PWA_FILE.has(pathname) ||
     STATIC_FILE.test(pathname);
 
   if (isPublic) return NextResponse.next();
