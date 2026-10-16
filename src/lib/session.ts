@@ -2,7 +2,7 @@ import "server-only";
 
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
-import { ADMIN_PASSWORD, ADMIN_USERNAME, SESSION_SECRET } from "@/lib/env";
+import { adminPassword, adminUsername, sessionSecret } from "@/lib/env";
 
 /**
  * Session handling for the single admin account.
@@ -17,7 +17,7 @@ const COOKIE = "penta_admin";
 const MAX_AGE_SECONDS = 60 * 60 * 8; // one working day
 
 function sign(payload: string): string {
-  return crypto.createHmac("sha256", SESSION_SECRET).update(payload).digest("hex");
+  return crypto.createHmac("sha256", sessionSecret()).update(payload).digest("hex");
 }
 
 /** Constant-time compare that tolerates mismatched lengths. */
@@ -34,8 +34,8 @@ function safeEqual(a: string, b: string): boolean {
  * take the same amount of work.
  */
 export function credentialsValid(username: string, password: string): boolean {
-  const userOk = safeEqual(username, ADMIN_USERNAME);
-  const passOk = safeEqual(password, ADMIN_PASSWORD);
+  const userOk = safeEqual(username, adminUsername());
+  const passOk = safeEqual(password, adminPassword());
   return userOk && passOk;
 }
 
