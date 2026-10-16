@@ -143,7 +143,7 @@ export default async function ProductsPage({
             No products match those filters.
           </p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="table-scroll">
             <table className="w-full min-w-[880px] border-collapse text-[13px]">
               <thead>
                 <tr className="table-head border-b border-line text-left text-[11px] uppercase tracking-wider text-subtle">

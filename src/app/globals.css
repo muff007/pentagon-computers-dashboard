@@ -76,6 +76,21 @@ body {
   border-radius: var(--radius-card);
 }
 
+/*
+ * Horizontal scroller for the wide tables.
+ *
+ * `position: relative` is load-bearing, not decoration. The action columns
+ * carry .sr-only labels, which are `position: absolute`. With no positioned
+ * ancestor those resolve against the viewport rather than this box, and an
+ * absolutely positioned element anchored outside a scroll container is not
+ * clipped by it — so they sat at x=867 and dragged the whole page sideways
+ * while the table itself was being clipped perfectly correctly.
+ */
+@utility table-scroll {
+  position: relative;
+  overflow-x: auto;
+}
+
 /* Sticky table headers inside a scrolling table wrapper. */
 @utility table-head {
   position: sticky;
