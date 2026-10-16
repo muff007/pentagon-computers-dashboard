@@ -1,26 +1,117 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Pentagon Computers — admin dashboard
+   Plain, dense and functional. Matches the storefront's blue.
+   ============================================================ */
+
+@theme {
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #dbe6fe;
+  --color-brand-200: #bfd3fe;
+  --color-brand-500: #3b6ef6;
+  --color-brand-600: #2450e0;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+
+  --color-ink-50: #f6f7f9;
+  --color-ink-100: #eceef2;
+  --color-ink-200: #dde1e7;
+  --color-ink-300: #c2c8d2;
+  --color-ink-400: #8a93a1;
+  --color-ink-500: #5b6472;
+  --color-ink-600: #454d59;
+  --color-ink-700: #333944;
+  --color-ink-800: #1f242c;
+  --color-ink-900: #111418;
+
+  --color-ok: #16a34a;
+  --color-warn: #d97706;
+  --color-bad: #dc2626;
+  --color-good: #16a34a;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-card: 0.375rem;
+
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: ease-out;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f1f3f6;
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --foreground: #111418;
+  --muted: #5b6472;
+  --subtle: #8a93a1;
+  --border: #e2e6ec;
+  --border-strong: #cfd6e0;
+  --shadow-sm: 0 1px 2px rgb(17 20 24 / 0.06);
+  --shadow-md: 0 2px 12px rgb(17 20 24 / 0.1);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@utility panel {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+
+/* Sticky table headers inside a scrolling table wrapper. */
+@utility table-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--surface-2);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+@keyframes dash-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade {
+  animation: dash-fade 0.15s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
 }
