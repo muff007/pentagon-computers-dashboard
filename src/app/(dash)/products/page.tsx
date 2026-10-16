@@ -15,6 +15,14 @@ export const metadata: Metadata = { title: "Products" };
 type SearchParams = Record<string, string | string[] | undefined>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
+/**
+ * On a phone the filter row is two cells wide: the minimum is half the row
+ * less half the 0.75rem gap, so exactly two sit side by side and the rest
+ * wrap in pairs. Above `sm` the controls go back to being sized by content.
+ */
+const filterCellBase = "min-w-[calc(50%-0.375rem)] flex-1 sm:min-w-0 sm:flex-none";
+const filterCell = `${fieldInline} ${filterCellBase}`;
+
 export default async function ProductsPage({
   searchParams,
 }: {
@@ -69,7 +77,7 @@ export default async function ProductsPage({
 
       {/* Filters — a plain GET form so the state lives in the URL */}
       <form className="panel mt-4 flex flex-wrap items-end gap-3 p-3" method="get">
-        <div className="min-w-52 flex-1">
+        <div className="w-full sm:min-w-52 sm:flex-1">
           <label htmlFor="q" className="sr-only">
             Search products
           </label>
@@ -88,7 +96,7 @@ export default async function ProductsPage({
           </div>
         </div>
 
-        <select name="brand" defaultValue={brand ?? ""} aria-label="Brand" className={fieldInline}>
+        <select name="brand" defaultValue={brand ?? ""} aria-label="Brand" className={filterCell}>
           <option value="">All brands</option>
           {brands.map((b) => (
             <option key={b.id} value={b.id}>
@@ -101,7 +109,7 @@ export default async function ProductsPage({
           name="category"
           defaultValue={category ?? ""}
           aria-label="Category"
-          className={fieldInline}
+          className={filterCell}
         >
           <option value="">All categories</option>
           {categories.map((c) => (
@@ -111,18 +119,21 @@ export default async function ProductsPage({
           ))}
         </select>
 
-        <select name="status" defaultValue={status ?? ""} aria-label="Status" className={fieldInline}>
+        <select name="status" defaultValue={status ?? ""} aria-label="Status" className={filterCell}>
           <option value="">Any status</option>
           <option value="active">Live</option>
           <option value="hidden">Hidden</option>
         </select>
 
-        <button type="submit" className={button("dark", "md")}>
-          Apply
-        </button>
-        <Link href="/products" className={button("ghost", "md")}>
-          Reset
-        </Link>
+        {/* Kept together so Reset cannot drop onto a row of its own. */}
+        <div className={`flex gap-2 ${filterCellBase}`}>
+          <button type="submit" className={button("dark", "md", "flex-1 sm:flex-none")}>
+            Apply
+          </button>
+          <Link href="/products" className={button("ghost", "md", "flex-1 sm:flex-none")}>
+            Reset
+          </Link>
+        </div>
       </form>
 
       {/* Table */}
