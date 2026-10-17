@@ -22,14 +22,27 @@ import {
   type PosterPlacement,
 } from "@/lib/types";
 
-/** A timestamptz rendered for <input type="datetime-local">. */
+/**
+ * A timestamptz rendered for <input type="datetime-local">, in IST.
+ *
+ * getHours() would read the clock of whatever machine ran this. Next renders
+ * client components on the server too, so the field would be filled in UTC in
+ * the HTML and then re-filled in IST once it hydrated — a changing value and a
+ * hydration mismatch. Reading the UTC parts of a shifted date gives the same
+ * string in both places, and matches what the save path now writes.
+ */
+const IST_MINUTES = 5 * 60 + 30;
+
 function forInput(value: string | null): string {
   if (!value) return "";
   const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+
+  const ist = new Date(d.getTime() + IST_MINUTES * 60_000);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours(),
-  )}:${pad(d.getMinutes())}`;
+  return `${ist.getUTCFullYear()}-${pad(ist.getUTCMonth() + 1)}-${pad(
+    ist.getUTCDate(),
+  )}T${pad(ist.getUTCHours())}:${pad(ist.getUTCMinutes())}`;
 }
 
 function Section({
@@ -195,7 +208,7 @@ export default function PosterForm({ poster }: { poster?: Poster }) {
 
         <div>
           <label htmlFor="starts_at" className={label}>
-            Starts (optional)
+            Starts (optional, IST)
           </label>
           <input
             id="starts_at"
@@ -208,7 +221,7 @@ export default function PosterForm({ poster }: { poster?: Poster }) {
 
         <div>
           <label htmlFor="ends_at" className={label}>
-            Ends (optional)
+            Ends (optional, IST)
           </label>
           <input
             id="ends_at"

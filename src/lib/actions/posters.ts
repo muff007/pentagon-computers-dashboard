@@ -41,10 +41,32 @@ function placementOf(value: FormDataEntryValue | null): PosterPlacement {
     : "home";
 }
 
-/** A blank date input posts "", which must become null rather than an epoch. */
+/**
+ * The shop is in India and schedules posters in IST.
+ *
+ * <input type="datetime-local"> posts wall-clock time with no timezone at all,
+ * e.g. "2026-10-17T19:21". new Date() then reads that in whatever timezone the
+ * *server* runs in, which on Vercel is UTC — so a poster set for 7:21 pm went
+ * live at 00:51 the following morning, five and a half hours late, and the
+ * shop simply saw a poster that never appeared.
+ *
+ * Stamping IST on it makes the field mean the same thing wherever this runs.
+ * A blank input posts "", which has to become null rather than an epoch.
+ */
+const IST_OFFSET = "+05:30";
+
 function dateOrNull(value: FormDataEntryValue | null): string | null {
   const v = String(value ?? "").trim();
-  return v ? new Date(v).toISOString() : null;
+  if (!v) return null;
+
+  // Anything that already carries an offset is trusted as-is.
+  const hasZone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(v);
+  // datetime-local omits seconds; Date wants them before an offset.
+  const withSeconds = v.length === 16 ? `${v}:00` : v;
+  const stamped = hasZone ? v : `${withSeconds}${IST_OFFSET}`;
+
+  const d = new Date(stamped);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
 export async function createPoster(

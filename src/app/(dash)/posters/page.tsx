@@ -28,6 +28,28 @@ export const metadata: Metadata = { title: "Posters" };
 type SearchParams = Record<string, string | string[] | undefined>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
+/**
+ * What the shop is actually looking at on the website right now.
+ *
+ * The badge used to read straight off is_active, so a poster scheduled for
+ * next week showed a green "Live" while the site showed nothing. The site's
+ * own rule is is_active AND inside the run dates, so the badge has to apply
+ * the same one or it is simply telling the shop something untrue.
+ */
+function visibility(poster: Poster): { label: string; className: string } {
+  const now = Date.now();
+  if (!poster.is_active) {
+    return { label: "Hidden", className: "bg-ink-100 text-ink-600" };
+  }
+  if (poster.starts_at && new Date(poster.starts_at).getTime() > now) {
+    return { label: "Scheduled", className: "bg-amber-100 text-amber-800" };
+  }
+  if (poster.ends_at && new Date(poster.ends_at).getTime() < now) {
+    return { label: "Ended", className: "bg-ink-100 text-ink-600" };
+  }
+  return { label: "Live", className: "bg-green-100 text-green-800" };
+}
+
 /** Whether a poster is inside its run dates right now. */
 function scheduleNote(poster: Poster): string | null {
   const now = Date.now();
@@ -171,12 +193,10 @@ export default async function PostersPage({
 
                         <span
                           className={`shrink-0 rounded-sm px-1.5 py-0.5 text-[10px] font-bold uppercase ${
-                            poster.is_active
-                              ? "bg-green-100 text-green-800"
-                              : "bg-ink-100 text-ink-600"
+                            visibility(poster).className
                           }`}
                         >
-                          {poster.is_active ? "Live" : "Hidden"}
+                          {visibility(poster).label}
                         </span>
 
                         <div className="flex shrink-0 items-center gap-1">
