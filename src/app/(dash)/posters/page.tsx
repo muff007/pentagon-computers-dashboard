@@ -128,6 +128,18 @@ export default async function PostersPage({
         </p>
       )}
 
+      {/* The poster itself saved; only the framing had nowhere to go. Said
+          plainly, because the alternative is arranging a poster over and over
+          and watching it revert to the defaults with no explanation. */}
+      {one(params.layout) === "missing" && (
+        <p className="mt-4 rounded-card border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] leading-relaxed text-amber-900">
+          <strong>The size, crop and background you arranged were not saved.</strong>{" "}
+          The database has nowhere to keep them yet. Open the Supabase SQL
+          editor, run <code>supabase/poster-layout.sql</code> once, then edit
+          this poster and arrange it again. Everything else saved normally.
+        </p>
+      )}
+
       {/* Grouped by placement, so it is obvious what appears where. */}
       <div className="mt-5 space-y-5">
         {POSTER_PLACEMENTS.map((placement) => {

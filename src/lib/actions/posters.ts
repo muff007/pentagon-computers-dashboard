@@ -104,7 +104,12 @@ export async function createPoster(
 
   // Before supabase/poster-layout.sql is run there is nowhere to put the
   // framing; save the poster anyway rather than losing the upload.
+  // Saving the poster matters more than the framing, so fall back rather than
+  // lose the upload — but the shop has to be told, or it spends an afternoon
+  // arranging a poster that silently reverts to the defaults every time.
+  let layoutDropped = false;
   if (error && layout && isMissingLayout(error)) {
+    layoutDropped = true;
     ({ error } = await admin().from("posters").insert(base));
   }
 
@@ -119,7 +124,7 @@ export async function createPoster(
   }
 
   revalidatePath("/posters");
-  redirect("/posters?created=1");
+  redirect(layoutDropped ? "/posters?created=1&layout=missing" : "/posters?created=1");
 }
 
 export async function updatePoster(
@@ -160,7 +165,9 @@ export async function updatePoster(
 
   let { error } = await admin().from("posters").update(values).eq("id", id);
 
+  let layoutDropped = false;
   if (error && layout && isMissingLayout(error)) {
+    layoutDropped = true;
     delete values.layout;
     ({ error } = await admin().from("posters").update(values).eq("id", id));
   }
@@ -169,7 +176,7 @@ export async function updatePoster(
 
   revalidatePath("/posters");
   revalidatePath(`/posters/${id}`);
-  redirect("/posters?saved=1");
+  redirect(layoutDropped ? "/posters?saved=1&layout=missing" : "/posters?saved=1");
 }
 
 export async function deletePoster(formData: FormData): Promise<void> {
