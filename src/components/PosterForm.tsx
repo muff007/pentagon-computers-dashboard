@@ -14,11 +14,13 @@ import {
   PLACEMENT_HINTS,
   PLACEMENT_LABELS,
   DEFAULT_LAYOUT,
+  joinLayouts,
+  splitLayouts,
+  type DeviceLayouts,
   DEFAULT_RATIO,
   POSTER_PLACEMENTS,
   posterLayout,
   type Poster,
-  type PosterLayout,
   type PosterPlacement,
 } from "@/lib/types";
 
@@ -78,12 +80,21 @@ export default function PosterForm({ poster }: { poster?: Poster }) {
   // Local preview so staff can see what they picked before saving.
   const [preview, setPreview] = useState<string | null>(poster?.image_url ?? null);
   // Starts filling the width of the slot this placement normally uses.
-  const [layout, setLayout] = useState<PosterLayout>(
-    posterLayout(poster?.layout) ?? {
-      ...DEFAULT_LAYOUT,
-      ratio: DEFAULT_RATIO[poster?.placement ?? "home"],
-    },
-  );
+  // One arrangement per screen size. Tablet and phone stay null until the shop
+  // actually customises them, so an unmodified poster keeps a single framing
+  // and the stored JSON stays as small as it was before.
+  const [layouts, setLayouts] = useState<DeviceLayouts>(() => {
+    const split = splitLayouts(poster?.layout);
+    return posterLayout(poster?.layout)
+      ? split
+      : {
+          ...split,
+          desktop: {
+            ...DEFAULT_LAYOUT,
+            ratio: DEFAULT_RATIO[poster?.placement ?? "home"],
+          },
+        };
+  });
 
   return (
     <form action={formAction} className="mt-5 space-y-4">
@@ -144,12 +155,16 @@ export default function PosterForm({ poster }: { poster?: Poster }) {
             <PosterEditor
               src={preview}
               placement={placement}
-              value={layout}
-              onChange={setLayout}
+              value={layouts}
+              onChange={setLayouts}
             />
           </div>
 
-          <input type="hidden" name="layout" value={JSON.stringify(layout)} />
+          <input
+            type="hidden"
+            name="layout"
+            value={JSON.stringify(joinLayouts(layouts))}
+          />
         </div>
 
         <div className="sm:col-span-2">

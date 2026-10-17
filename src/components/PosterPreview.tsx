@@ -1,7 +1,12 @@
 "use client";
 
 import PosterFrame from "@/components/PosterFrame";
-import type { PosterLayout, PosterPlacement } from "@/lib/types";
+import {
+  DEVICE_PREVIEW_WIDTH,
+  type PosterDevice,
+  type PosterLayout,
+  type PosterPlacement,
+} from "@/lib/types";
 
 /**
  * The poster in place on a miniature of the real page.
@@ -16,17 +21,28 @@ export default function PosterPreview({
   src,
   placement,
   layout,
+  device = "desktop",
 }: {
   src: string;
   placement: PosterPlacement;
   layout: PosterLayout;
+  device?: PosterDevice;
 }) {
+  /*
+   * The mock is scaled down from a real screen width, so a phone preview is
+   * genuinely narrow rather than just a smaller picture of a desktop. 1280px
+   * of page drawn at 420px is the scale everything else here was drawn at.
+   */
+  const width = Math.round((DEVICE_PREVIEW_WIDTH[device] / 1280) * 420);
   // The very same renderer the storefront uses, so the preview cannot drift
   // from reality.
   const poster = <PosterFrame src={src} layout={layout} />;
 
   return (
-    <div className="overflow-hidden rounded-card border border-line bg-white shadow-sm">
+    <div
+      className="mx-auto overflow-hidden rounded-card border border-line bg-white shadow-sm transition-[max-width] duration-200"
+      style={{ maxWidth: width }}
+    >
       <Chrome />
 
       {placement === "hero" && (

@@ -148,6 +148,78 @@ export const DEFAULT_LAYOUT: PosterLayout = {
   bg: "#ffffff",
 };
 
+/**
+ * A poster is arranged once per screen size.
+ *
+ * One framing cannot serve all three. A hero arranged as a wide strip for a
+ * monitor becomes a 390x146 letterbox on a phone, where the headline is
+ * unreadable — so the shop can set a taller, closer crop for phones and the
+ * site switches between them in CSS.
+ */
+export const POSTER_DEVICES = ["desktop", "tablet", "phone"] as const;
+
+export type PosterDevice = (typeof POSTER_DEVICES)[number];
+
+export const DEVICE_LABEL: Record<PosterDevice, string> = {
+  desktop: "Desktop",
+  tablet: "Tablet",
+  phone: "Phone",
+};
+
+/** The width each arrangement is previewed at, and where the site switches. */
+export const DEVICE_PREVIEW_WIDTH: Record<PosterDevice, number> = {
+  desktop: 1280,
+  tablet: 768,
+  phone: 390,
+};
+
+/**
+ * What goes in the database: the desktop arrangement at the top level, with
+ * optional overrides beneath it. A poster saved before this existed has only
+ * the top level and keeps working — the same framing is used everywhere.
+ */
+export type StoredPosterLayout = Partial<PosterLayout> & {
+  tablet?: Partial<PosterLayout> | null;
+  phone?: Partial<PosterLayout> | null;
+};
+
+/** Every arrangement the editor works with, each inheriting the size above. */
+export type DeviceLayouts = {
+  desktop: PosterLayout;
+  /** Null means "whatever the larger screen does". */
+  tablet: PosterLayout | null;
+  phone: PosterLayout | null;
+};
+
+/** What a device actually renders as, once inheritance is applied. */
+export function effectiveLayout(
+  layouts: DeviceLayouts,
+  device: PosterDevice,
+): PosterLayout {
+  if (device === "desktop") return layouts.desktop;
+  if (device === "tablet") return layouts.tablet ?? layouts.desktop;
+  return layouts.phone ?? layouts.tablet ?? layouts.desktop;
+}
+
+/** Splits a stored value into the three arrangements the editor edits. */
+export function splitLayouts(stored?: StoredPosterLayout | null): DeviceLayouts {
+  const desktop = posterLayout(stored) ?? DEFAULT_LAYOUT;
+  const one = (v?: Partial<PosterLayout> | null) =>
+    v && typeof v.scale === "number" && v.scale > 0
+      ? (posterLayout(v) as PosterLayout)
+      : null;
+  return { desktop, tablet: one(stored?.tablet), phone: one(stored?.phone) };
+}
+
+/** Back into the single jsonb value the column holds. Unset devices are omitted. */
+export function joinLayouts(layouts: DeviceLayouts): StoredPosterLayout {
+  return {
+    ...layouts.desktop,
+    ...(layouts.tablet ? { tablet: layouts.tablet } : {}),
+    ...(layouts.phone ? { phone: layouts.phone } : {}),
+  };
+}
+
 export function posterLayout(
   stored?: Partial<PosterLayout> | null,
 ): PosterLayout | null {
