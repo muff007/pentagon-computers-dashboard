@@ -67,14 +67,6 @@ export default async function ProductsPage({
         </p>
       )}
 
-      {one(params.error) === "sold" && (
-        <p className="mt-4 rounded-card border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-900">
-          <strong>Not deleted.</strong> That product appears in an existing
-          order, so removing it would break the order history. Hide it from the
-          store instead — the eye icon in the Actions column.
-        </p>
-      )}
-
       {/* Filters — a plain GET form so the state lives in the URL */}
       <form className="panel mt-4 flex flex-wrap items-end gap-3 p-3" method="get">
         <div className="w-full sm:min-w-52 sm:flex-1">

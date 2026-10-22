@@ -229,27 +229,25 @@ export async function deleteProduct(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
-  // A sold product must not vanish: order_items points at it with
-  // "on delete set null", so deleting it would quietly cut the link between an
-  // order line and the product it was. Hiding keeps history intact.
-  const { count } = await admin()
-    .from("order_items")
-    .select("id", { count: "exact", head: true })
-    .eq("product_id", id);
-
-  if ((count ?? 0) > 0) {
-    revalidatePath("/products");
-    redirect(`/products?error=${encodeURIComponent("sold")}`);
-  }
-
+  // Deleting a sold product used to be refused, to protect order history. That
+  // was unnecessary: order_items keeps its own copy of the name, price, image
+  // and quantity, and product_id is "on delete set null", so an invoice is
+  // unchanged by this — it simply stops pointing at a catalogue entry that no
+  // longer exists. The shop needs to be able to clear out old stock.
   const { data } = await admin()
     .from("products")
-    .select("image_url")
+    .select("image_url, gallery")
     .eq("id", id)
     .maybeSingle();
 
   await admin().from("products").delete().eq("id", id);
-  await deleteProductImage(data?.image_url ?? null);
+
+  // Cover and gallery both, or the extra photos sit in storage for ever with
+  // nothing left pointing at them.
+  const gallery = Array.isArray(data?.gallery) ? (data.gallery as string[]) : [];
+  for (const url of [data?.image_url ?? null, ...gallery]) {
+    await deleteProductImage(url);
+  }
 
   revalidatePath("/products");
 }
